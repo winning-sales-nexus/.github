@@ -81,7 +81,7 @@ is justified in the PR description (no code comment, not even here).
 - One repository per table, injected ONLY by the domain that owns the aggregate (applications
   never touch repositories; repositories never inject each other). Other modules go through the
   owning module's exported services.
-- Repository methods speak domain language (`revokeFamily`, `transitionHealth`), not SQL language
+- Repository methods speak domain language (`revokeFamily`, `replaceCurrent`), not SQL language
   (`selectWhereStatusAnd...`).
 - Base API: `findOne`/`findMany`/`findAllPaginated` (public), `createRow`/`createManyRows`/
   `updateRow`/`updateManyRows`/`softDeleteRow` (protected — concrete repos expose domain-named
