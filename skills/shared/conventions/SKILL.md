@@ -102,8 +102,18 @@ config, not a difference of opinion.
   annotated; every function/method declares its return type (`explicit-function-return-type` with
   `allowExpressions`, plus `explicit-module-boundary-types`); every class member declares
   accessibility. Also on: `prefer-readonly`, `no-import-type-side-effects`.
-- Small units enforced: `max-lines-per-function: 40`, `complexity: 10`, `max-depth: 3`,
-  `max-params: 8`.
+- Small units enforced: `complexity: 10`, `max-params: 8`, and per repo:
+  `max-lines-per-function: 40` / `max-depth: 2` in the API, `80` / `3` in the front (JSX needs the
+  room). These are the only numbers that differ.
+- **Three local rules, in every repo** (`eslint-rules/index.mjs`): `local/no-comments` (only
+  directives pass — see Comments), `local/no-else` (handle the exit case first and return; the
+  normal path stays at the outer level), `local/no-search-in-loop` (no `find`/`includes`/`filter`
+  over an array inside another iteration — build a `Map`/`Set` first). Specs are exempt from the
+  last two, never from the first.
+- **Front only — no literal colour**: a Tailwind arbitrary colour (`bg-[#DA2640]`, `[rgb(`,
+  `[hsl(`, `[oklch(`) or a colour in a `style` object is a lint error. Every colour comes from the
+  semantic tokens in `src/index.css` (design system); the lint rule is the gate, review is the
+  second look.
 - **No `any`** — `unknown` + narrowing. An `as` cast is replaced by a type guard.
 - **No default exports. No barrel files** (`index.ts` re-exports) — they breed circular imports;
   import from the concrete file.
