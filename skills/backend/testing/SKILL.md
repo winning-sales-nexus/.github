@@ -59,5 +59,10 @@ Rules that keep it honest:
 - Generated types, Kysely itself, Nest wiring, zod schemas doing what zod does.
 - Trivial pass-through applications (delegation with no branching) — the integration test of the
   flow covers them.
-- Coverage number is a signal, not a goal. A meaningful state-machine transition test beats ten
-  getter tests; review coverage on diffs, don't chase a global %.
+- **Coverage is a gate: 85% in lines, branches, functions and statements**, measured over unit +
+  integration merged (`npm run coverage:gate`; the CI runs it after the integration suite and
+  blocks below the threshold). The number is a floor, not a target — a meaningful state-machine
+  transition test still beats ten getter tests, and a file below 85% is a hint about what is
+  untested, not a reason to add a getter test. No new coverage exclusion without the reason in the
+  PR body; the only standing ones are `*.module.ts`, `main.ts`, `tracing.ts` and the generated
+  database types.
