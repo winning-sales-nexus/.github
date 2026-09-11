@@ -1,0 +1,50 @@
+name: 🧱 Débito técnico
+description: Algo que funciona hoje mas cobra juros — refactor, upgrade, cobertura, remoção de gambiarra.
+title: '[TECH] '
+labels: ['type: tech-debt', 'status: refinement']
+body:
+    - type: textarea
+      id: situation
+      attributes:
+          label: Situação atual
+          description: O que existe hoje e por que foi feito assim (contexto histórico importa).
+      validations:
+          required: true
+
+    - type: textarea
+      id: cost
+      attributes:
+          label: Qual o juro que estamos pagando
+          description: Lentidão de desenvolvimento, risco de bug, custo de infra, dor operacional. Seja concreto.
+      validations:
+          required: true
+
+    - type: textarea
+      id: proposal
+      attributes:
+          label: Proposta
+          description: O estado desejado e o caminho até ele (pode ser incremental).
+      validations:
+          required: true
+
+    - type: dropdown
+      id: trigger
+      attributes:
+          label: Gatilho
+          description: Quando isso passa a ser urgente?
+          options:
+              - Já é urgente
+              - Quando tivermos o primeiro cliente pagante
+              - Quando o volume crescer (escala)
+              - Quando tocarmos essa área de novo
+              - Sem gatilho definido
+      validations:
+          required: true
+
+    - type: textarea
+      id: risk
+      attributes:
+          label: Risco de NÃO fazer
+          description: O que acontece se ficar mais 6 meses assim.
+      validations:
+          required: true

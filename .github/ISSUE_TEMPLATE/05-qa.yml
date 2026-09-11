@@ -1,0 +1,98 @@
+name: 🧪 Handoff de QA
+description: Roteiro de validação manual de um épico, escrito no planejamento e executado quando a milestone fecha.
+title: '[QA] '
+labels: ['type: qa']
+body:
+    - type: markdown
+      value: |
+          Este roteiro é **executado por outra pessoa — ou por um agente — sem acesso à sua cabeça**. Cada caso precisa de estado inicial determinístico, passos literais e uma expectativa observável.
+
+          "Verificar se a tela está correta" não é um caso. "O painel mostra `R$ 1.240,00` em *Meta do mês*" é.
+
+    - type: input
+      id: milestone
+      attributes:
+          label: Milestone
+          description: O slug, igual ao da branch. É por ele que o roteiro é encontrado.
+          placeholder: fundacao
+      validations:
+          required: true
+
+    - type: input
+      id: branches
+      attributes:
+          label: Branches a validar
+          description: Uma por repositório envolvido. Um épico costuma atravessar api e fe.
+          placeholder: 'nexu-api#milestone/fundacao, nexu-fe#milestone/fundacao'
+      validations:
+          required: true
+
+    - type: textarea
+      id: setup
+      attributes:
+          label: Preparo do ambiente
+          description: Comandos literais, na ordem, do zero até a aplicação de pé. Inclua o que for específico deste épico (seed, conexão com o HubSpot de teste, número de teste da Meta, variável de ambiente).
+          value: |
+              ```
+              docker compose up -d
+              npm run migrate:latest && npm run codegen
+              npm run seed:dev
+              npm run start:dev
+              ```
+      validations:
+          required: true
+
+    - type: textarea
+      id: preconditions
+      attributes:
+          label: Pré-condições externas
+          description: O que precisa existir fora da máquina e não dá para semear — conta de teste do HubSpot com token no `.env`, número de teste da Meta, túnel de webhook no ar. Diga como conferir que está de pé, e o que fazer quando não está.
+          placeholder: |
+              - HubSpot de teste: token da conta de teste no `.env`. Sem token válido, os casos 4 a 7 ficam ⊘ bloqueados, não falhos
+              - Número de teste da Meta conectado pelo embedded signup — sem ele, os casos 8 a 11 ficam ⊘ bloqueados
+      validations:
+          required: true
+
+    - type: textarea
+      id: cases
+      attributes:
+          label: Casos de teste
+          description: Um bloco por caso, neste formato. Cada um começa do estado que o Preparo deixou, ou declara o próprio.
+          value: |
+              ### Caso 1 — <o que está sendo provado, em uma frase>
+
+              **Preparo:** `npm run seed:dev` <!-- ou "nenhum" -->
+              **Passos:**
+
+              1.
+              2.
+
+              **Espera:** <o que fica observável na tela, no Mailpit, no log ou na resposta do provedor>
+
+              ### Caso 2 — <...>
+
+              **Preparo:**
+              **Passos:**
+
+              1.
+
+              **Espera:**
+      validations:
+          required: true
+
+    - type: textarea
+      id: out-of-scope
+      attributes:
+          label: Fora do roteiro
+          description: O que esta rodada NÃO cobre, e por quê. Protege o executor de inventar caso e protege você de achar que foi coberto.
+          placeholder: |
+              - Produção — só contas de teste
+              - Teams — app do Entra ID ainda em aprovação (#12)
+      validations:
+          required: true
+
+    - type: textarea
+      id: notes
+      attributes:
+          label: Observações
+          description: Armadilhas conhecidas, dados de teste, o que já falhou antes neste fluxo.

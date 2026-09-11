@@ -1,0 +1,74 @@
+name: 🐛 Bug
+description: Comportamento incorreto em ambiente de dev, staging ou produção.
+title: '[BUG] '
+labels: ['type: bug', 'status: refinement']
+body:
+    - type: markdown
+      value: |
+          Se houver `requestId` nos logs ou na resposta de erro, cole — ele encontra o fluxo inteiro no Grafana.
+
+    - type: textarea
+      id: what-happens
+      attributes:
+          label: O que acontece
+          description: Comportamento observado.
+      validations:
+          required: true
+
+    - type: textarea
+      id: expected
+      attributes:
+          label: O que deveria acontecer
+      validations:
+          required: true
+
+    - type: textarea
+      id: steps
+      attributes:
+          label: Como reproduzir
+          value: |
+              1.
+              2.
+              3.
+      validations:
+          required: true
+
+    - type: input
+      id: request-id
+      attributes:
+          label: requestId / correlation id
+          placeholder: 019fcae7-3e54-755a-8458-bdb605b324bb
+
+    - type: dropdown
+      id: environment
+      attributes:
+          label: Ambiente
+          options:
+              - local
+              - dev
+              - production
+      validations:
+          required: true
+
+    - type: dropdown
+      id: severity
+      attributes:
+          label: Severidade
+          description: |
+              S1 = dinheiro/dados de cliente em risco ou produto parado · S2 = fluxo principal quebrado com contorno ·
+              S3 = incômodo · S4 = cosmético
+          options:
+              - S1 — crítico
+              - S2 — alto
+              - S3 — médio
+              - S4 — baixo
+      validations:
+          required: true
+
+    - type: textarea
+      id: impact
+      attributes:
+          label: Impacto
+          description: Quantas empresas e usuários afetados? Há risco a dados de cliente, escrita indevida no CRM ou mensagem indevida?
+      validations:
+          required: true

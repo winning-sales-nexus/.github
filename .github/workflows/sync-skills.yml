@@ -1,0 +1,179 @@
+name: Sync Skills to All Repos
+
+on:
+    push:
+        branches: [main]
+        paths:
+            - 'skills/**'
+
+    workflow_dispatch:
+        inputs:
+            repos:
+                description: 'Repos para sincronizar (comma-separated, ou "all" para todos)'
+                type: string
+                default: 'all'
+            dry_run:
+                description: 'Apenas listar o que mudaria, sem fazer push'
+                type: boolean
+                default: false
+
+permissions:
+    contents: read
+
+jobs:
+    sync:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Sync skills to repos based on config
+              env:
+                  GH_TOKEN: ${{ secrets.GH_TOKEN }}
+              run: |
+                  set -uo pipefail
+
+                  ORG="winning-sales-nexus"
+                  CONFIG_FILE="skills/sync-config.json"
+                  BRANCH="main"
+                  DRY_RUN="${{ inputs.dry_run || 'false' }}"
+
+                  if [ ! -f "$CONFIG_FILE" ]; then
+                    echo "❌ Config não encontrado: $CONFIG_FILE"
+                    exit 1
+                  fi
+
+                  if [ -z "${GH_TOKEN:-}" ]; then
+                    echo "❌ Secret GH_TOKEN ausente — a action não consegue dar push nos repos destino."
+                    exit 1
+                  fi
+
+                  # repo -> lista de folders
+                  declare -A REPO_FOLDERS
+
+                  for group in $(jq -r '.groups | keys[]' "$CONFIG_FILE"); do
+                    folders=$(jq -r ".groups[\"$group\"].folders | join(\",\")" "$CONFIG_FILE")
+                    for repo in $(jq -r ".groups[\"$group\"].repos[]" "$CONFIG_FILE"); do
+                      if [ -n "${REPO_FOLDERS[$repo]:-}" ]; then
+                        REPO_FOLDERS[$repo]="${REPO_FOLDERS[$repo]},$folders"
+                      else
+                        REPO_FOLDERS[$repo]="$folders"
+                      fi
+                    done
+                  done
+
+                  INPUT_REPOS="${{ inputs.repos || 'all' }}"
+                  if [ "$INPUT_REPOS" != "all" ]; then
+                    IFS=',' read -ra SELECTED <<< "$INPUT_REPOS"
+                    declare -A SELECTED_MAP
+                    for r in "${SELECTED[@]}"; do SELECTED_MAP[$(echo "$r" | xargs)]=1; done
+                    for repo in "${!REPO_FOLDERS[@]}"; do
+                      [ -z "${SELECTED_MAP[$repo]:-}" ] && unset "REPO_FOLDERS[$repo]"
+                    done
+                    echo "🎯 Filtro ativo: ${SELECTED[*]}"
+                  fi
+
+                  echo "📦 Repos a sincronizar: ${#REPO_FOLDERS[@]}"
+                  echo ""
+
+                  SYNCED=0; UNCHANGED=0; FAILED=0
+
+                  for REPO in "${!REPO_FOLDERS[@]}"; do
+                    IFS=',' read -ra RAW_FOLDERS <<< "${REPO_FOLDERS[$REPO]}"
+                    declare -A SEEN; FOLDERS=()
+                    for f in "${RAW_FOLDERS[@]}"; do
+                      if [ -z "${SEEN[$f]:-}" ]; then SEEN[$f]=1; FOLDERS+=("$f"); fi
+                    done
+                    unset SEEN
+
+                    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+                    echo "📂 $REPO ← [${FOLDERS[*]}]"
+
+                    if [ "$DRY_RUN" = "true" ]; then
+                      echo "  🔍 [dry run] folders: ${FOLDERS[*]}"
+                      continue
+                    fi
+
+                    TMPDIR=$(mktemp -d)
+                    if ! git clone --depth 1 --branch "$BRANCH" \
+                        "https://x-access-token:${GH_TOKEN}@github.com/$ORG/$REPO.git" \
+                        "$TMPDIR/$REPO" 2>&1; then
+                      echo "  ❌ clone falhou"
+                      FAILED=$((FAILED + 1)); rm -rf "$TMPDIR"; continue
+                    fi
+
+                    cd "$TMPDIR/$REPO"
+                    git config user.name "nexu Skills Bot"
+                    git config user.email "skills-bot@nexu.example.com"
+
+                    mkdir -p ".claude/skills"
+
+                    # conjunto canônico: tudo que este repo deve ter ao final
+                    declare -A CANON
+                    for folder in "${FOLDERS[@]}"; do
+                      SOURCE="$GITHUB_WORKSPACE/skills/$folder"
+                      [ -d "$SOURCE" ] || continue
+                      for skill_dir in "$SOURCE"/*/; do
+                        [ -d "$skill_dir" ] && CANON["$(basename "$skill_dir")"]=1
+                      done
+                    done
+
+                    # skills locais que o repo declarou manter (não são podadas)
+                    for kept in $(jq -r --arg r "$REPO" '.keep[$r][]? // empty' "$GITHUB_WORKSPACE/$CONFIG_FILE"); do
+                      CANON["$kept"]=1
+                      echo "  📌 mantida local: $kept"
+                    done
+
+                    # poda: .claude/skills é um espelho, não um acumulado
+                    for existing in .claude/skills/*/; do
+                      [ -d "$existing" ] || continue
+                      name=$(basename "$existing")
+                      if [ -z "${CANON[$name]:-}" ]; then
+                        rm -rf "$existing"
+                        echo "  🗑️  podada: $name"
+                      fi
+                    done
+
+                    for folder in "${FOLDERS[@]}"; do
+                      SOURCE="$GITHUB_WORKSPACE/skills/$folder"
+                      [ -d "$SOURCE" ] || continue
+                      for skill_dir in "$SOURCE"/*/; do
+                        [ -d "$skill_dir" ] || continue
+                        skill_name=$(basename "$skill_dir")
+                        rm -rf ".claude/skills/$skill_name"
+                        mkdir -p ".claude/skills/$skill_name"
+                        cp -r "$skill_dir"/. ".claude/skills/$skill_name/"
+                      done
+                    done
+
+                    {
+                      echo "# Skills sincronizadas de $ORG/.github — não editar aqui."
+                      echo "# Para mudar uma skill, abra PR no .github. Grupos: ${FOLDERS[*]}"
+                      for name in $(printf '%s\n' "${!CANON[@]}" | sort); do echo "$name"; done
+                    } > ".claude/skills/.synced-from-org"
+                    unset CANON
+
+                    git add -fA .claude/skills
+
+                    if git diff --cached --quiet; then
+                      echo "  ✅ já está atualizado"
+                      UNCHANGED=$((UNCHANGED + 1))
+                      cd "$GITHUB_WORKSPACE"; rm -rf "$TMPDIR"; continue
+                    fi
+
+                    git commit -q -m "chore: sync skills from .github [${FOLDERS[*]}]"
+
+                    if git push origin "$BRANCH" 2>&1; then
+                      echo "  🚀 synced"
+                      SYNCED=$((SYNCED + 1))
+                    else
+                      echo "  ⚠️  push bloqueado (confira os rulesets do repositório)"
+                      FAILED=$((FAILED + 1))
+                    fi
+
+                    cd "$GITHUB_WORKSPACE"; rm -rf "$TMPDIR"
+                  done
+
+                  echo ""
+                  echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+                  echo "📊 Resultado: $SYNCED sincronizados · $UNCHANGED sem mudança · $FAILED falhas"
+                  [ "$FAILED" -eq 0 ]

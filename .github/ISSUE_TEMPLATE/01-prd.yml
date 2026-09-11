@@ -1,0 +1,73 @@
+name: 📋 PRD (Roadmap)
+description: Documento de requisitos de produto — a unidade de roadmap. Vira epic com sub-issues.
+title: '[PRD] '
+labels: ['type: prd', 'status: refinement']
+body:
+    - type: markdown
+      value: |
+          Um PRD descreve **problema e solução do ponto de vista do usuário**. Decisões técnicas entram em "Decisões de implementação", sem caminhos de arquivo nem código (envelhecem rápido).
+
+    - type: textarea
+      id: problem
+      attributes:
+          label: Declaração do problema
+          description: O problema que o usuário enfrenta, na perspectiva dele. Inclua evidência (dado, relato de cliente, número).
+          placeholder: Líderes de vendas só percebem que a meta do mês está em risco na última semana, porque o CRM está desatualizado e ninguém lê as calls...
+      validations:
+          required: true
+
+    - type: textarea
+      id: solution
+      attributes:
+          label: Solução
+          description: O que passa a ser possível, na perspectiva do usuário.
+      validations:
+          required: true
+
+    - type: textarea
+      id: stories
+      attributes:
+          label: Histórias de usuário
+          description: Lista numerada e extensa no formato "Como <ator>, eu quero <funcionalidade>, para que <benefício>".
+          value: |
+              1. Como <ator>, eu quero <funcionalidade>, para que <benefício>
+      validations:
+          required: true
+
+    - type: textarea
+      id: implementation
+      attributes:
+          label: Decisões de implementação
+          description: Módulos afetados, contratos de API, mudanças de schema, decisões arquiteturais, integrações.
+      validations:
+          required: true
+
+    - type: textarea
+      id: testing
+      attributes:
+          label: Decisões de teste
+          description: O que será testado e em que nível (unit/integração). Comportamento externo, nunca detalhe de implementação.
+      validations:
+          required: true
+
+    - type: textarea
+      id: metrics
+      attributes:
+          label: Métricas de sucesso
+          description: Como saberemos que funcionou? (ex. uso semanal por vendedor, tempo de onboarding, acerto das leituras no eval)
+      validations:
+          required: true
+
+    - type: textarea
+      id: out-of-scope
+      attributes:
+          label: Fora do escopo
+          description: O que explicitamente NÃO entra — é aqui que MVP se protege.
+      validations:
+          required: true
+
+    - type: textarea
+      id: notes
+      attributes:
+          label: Observações adicionais
+          description: Riscos, dependências externas, questões em aberto.

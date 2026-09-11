@@ -1,0 +1,14 @@
+{
+    "description": "Mapeamento de repos para grupos de skills. Cada repo recebe as skills das pastas listadas em 'folders', sincronizadas para .claude/skills/<nome>/SKILL.md. 'keep' lista skills locais do repo que a sync não deve podar.",
+    "groups": {
+        "backend": {
+            "folders": ["shared", "backend"],
+            "repos": ["nexu-api"]
+        },
+        "frontend": {
+            "folders": ["shared"],
+            "repos": ["nexu-fe"]
+        }
+    },
+    "keep": {}
+}

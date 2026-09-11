@@ -1,0 +1,52 @@
+name: ✨ Feature
+description: Uma unidade de trabalho entregável, geralmente filha de um PRD.
+title: '[FEAT] '
+labels: ['type: feature', 'status: refinement']
+body:
+    - type: textarea
+      id: context
+      attributes:
+          label: Contexto
+          description: Por que isso existe. Link para o PRD pai, se houver.
+          placeholder: 'Parte do PRD #12 — fundação.'
+      validations:
+          required: true
+
+    - type: textarea
+      id: scope
+      attributes:
+          label: O que será feito
+          description: Descrição objetiva do comportamento esperado.
+      validations:
+          required: true
+
+    - type: textarea
+      id: acceptance
+      attributes:
+          label: Critérios de aceite
+          description: Checklist verificável — cada item deve ser demonstrável.
+          value: |
+              - [ ]
+              - [ ] Endpoint documentado no Swagger (request, response e erros)
+              - [ ] Testes cobrindo o comportamento
+      validations:
+          required: true
+
+    - type: textarea
+      id: technical
+      attributes:
+          label: Notas técnicas
+          description: Módulos afetados, migrations, filas, integrações externas.
+
+    - type: dropdown
+      id: layer
+      attributes:
+          label: Camada
+          multiple: true
+          options:
+              - API
+              - Frontend
+              - Infra
+              - Banco de dados
+      validations:
+          required: true
