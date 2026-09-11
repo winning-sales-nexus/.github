@@ -75,6 +75,21 @@ Three consequences worth spelling out, because each one has already caused a wro
 A term missing from this table is a term that has not been decided: add the row in the same PR that
 introduces it, so the second person to need it does not invent a synonym.
 
+## Data conventions that every module inherits
+
+Three shapes are fixed at the platform level so no module decides them again:
+
+- **Money is an integer amount in cents, with its currency next to it** (`amountInCents: number`,
+  `currency: 'BRL'`). Never a float, never a string with a decimal separator. Formatting
+  (`R$ 57.300`) happens only in the front, with `Intl` in pt-BR.
+- **Time is stored as `timestamptz` in UTC and read in the company's time zone.** Every company has
+  `Companies.timezone` (IANA name, default `America/Sao_Paulo`). "Today", "at 7am", "this month"
+  and the pace of a goal are computed in that zone — never in the server's, never in a hard-coded
+  Brazil offset. A platform-wide schedule (a cron command) uses `CRON_TIMEZONE`.
+- **Every external id and every idempotency key carries its provider** (`provider + externalId`,
+  `hubspot:deal:123`, `jobId: \`wa-inbound-${externalMessageId}\``). Two providers can hand out the
+  same id; the pair is what is unique.
+
 ## TypeScript & lint
 
 **These rules are identical in every repo.** The eslint configs carry the same typing block; only
