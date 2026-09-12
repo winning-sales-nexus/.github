@@ -123,6 +123,13 @@ table — same rule as renaming one.
 | `llm-conversation`            | Tool-loop conversations: round cap, cost-cap refusal, tool failure | `name`, `used`                                                                                                   |
 | `llm-metering`                | Monthly cap refusal, unmetered generation (no tenant)              | `period`                                                                                                         |
 | `llm-pricing`                 | Model missing from `LLM_PRICE_TABLE` (cost recorded as zero)       | `modelId`                                                                                                        |
+| `meetings-registration`       | Meeting occurrence registered, duplicate, skipped as internal, cancelled | `meetingId`, `platform`, `audience`, `source`, `botCancelled`                                              |
+| `meetings-bot`                | Bot requested at the provider, lifecycle applied or ignored, unknown bot | `meetingId`, `provider`, `botId`, `lifecycle`, `detail`, `kind`                                            |
+| `meetings-webhook`            | Provider webhook accepted, rejected, unparseable or unconfigured     | `kind`, `code`, `reason`, `setting`, `detail`                                                                    |
+| `meetings-artifacts`          | Transcript and audio collected to the lake, or the meeting closed without them | `meetingId`, `transcriptArtifactId`, `audioArtifactId`, `durationSeconds`, `outcome`, `lifecycle`  |
+| `meetings-reconcile`          | Reconciliation sweep fan-out                                        | `stale`, `awaitingOutcome`, `awaitingBot`                                                                        |
+| `calendars-connection`        | Calendar connected, rejected or disconnected                        | `provider`, `connectionId`, `reason`                                                                             |
+| `calendars-sweep`             | Calendar sweep fan-out, per-user outcome, failure, invalidation     | `connectionId`, `userId`, `provider`, `listed`, `registered`, `cancelled`, `withoutLink`, `alreadyStarted`, `kind` |
 
 `message` is static by rule, so it is a reliable filter — but it travels as the **log line**, not as
 structured metadata, so the filter is the line filter: ``|= `whatsapp connection failed` `` works
