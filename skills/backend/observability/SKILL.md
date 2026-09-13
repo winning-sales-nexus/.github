@@ -128,6 +128,7 @@ table — same rule as renaming one.
 | `meetings-webhook`            | Provider webhook accepted, rejected, unparseable or unconfigured     | `kind`, `code`, `reason`, `setting`, `detail`                                                                    |
 | `meetings-artifacts`          | Post-call transcript requested or still processing, transcript and audio collected to the lake, or the meeting closed without them | `meetingId`, `provider`, `transcriptId`, `keyTerms`, `transcriptArtifactId`, `audioArtifactId`, `durationSeconds`, `outcome`, `lifecycle`, `detail` |
 | `meetings-reconcile`          | Reconciliation sweep fan-out                                        | `stale`, `awaitingOutcome`, `awaitingBot`                                                                        |
+| `meetings-deal-link`          | Deal link suggested and applied, kept manual, set by a person, skipped | `meetingId`, `state`, `reason`, `dealId`, `candidates`, `userId`                                             |
 | `calendars-connection`        | Calendar connected, rejected or disconnected, assistant invite turned on or off | `provider`, `connectionId`, `reason`, `enabled`, `userId`                                                  |
 | `calendars-sweep`             | Calendar sweep fan-out, per-user outcome, failure, invalidation, assistant invited as a guest or refused | `connectionId`, `userId`, `provider`, `listed`, `registered`, `cancelled`, `withoutLink`, `alreadyStarted`, `invited`, `meetingId`, `outcome`, `kind` |
 
