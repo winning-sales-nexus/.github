@@ -128,8 +128,8 @@ table — same rule as renaming one.
 | `meetings-webhook`            | Provider webhook accepted, rejected, unparseable or unconfigured     | `kind`, `code`, `reason`, `setting`, `detail`                                                                    |
 | `meetings-artifacts`          | Post-call transcript requested or still processing, transcript and audio collected to the lake, or the meeting closed without them | `meetingId`, `provider`, `transcriptId`, `keyTerms`, `transcriptArtifactId`, `audioArtifactId`, `durationSeconds`, `outcome`, `lifecycle`, `detail` |
 | `meetings-reconcile`          | Reconciliation sweep fan-out                                        | `stale`, `awaitingOutcome`, `awaitingBot`                                                                        |
-| `calendars-connection`        | Calendar connected, rejected or disconnected                        | `provider`, `connectionId`, `reason`                                                                             |
-| `calendars-sweep`             | Calendar sweep fan-out, per-user outcome, failure, invalidation     | `connectionId`, `userId`, `provider`, `listed`, `registered`, `cancelled`, `withoutLink`, `alreadyStarted`, `kind` |
+| `calendars-connection`        | Calendar connected, rejected or disconnected, assistant invite turned on or off | `provider`, `connectionId`, `reason`, `enabled`, `userId`                                                  |
+| `calendars-sweep`             | Calendar sweep fan-out, per-user outcome, failure, invalidation, assistant invited as a guest or refused | `connectionId`, `userId`, `provider`, `listed`, `registered`, `cancelled`, `withoutLink`, `alreadyStarted`, `invited`, `meetingId`, `outcome`, `kind` |
 
 `message` is static by rule, so it is a reliable filter — but it travels as the **log line**, not as
 structured metadata, so the filter is the line filter: ``|= `whatsapp connection failed` `` works
