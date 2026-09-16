@@ -107,6 +107,7 @@ table — same rule as renaming one.
 | `auth-refresh-reuse`          | Refresh token reuse — family revoked                               | `familyId`, `revokedSessions`, `userId`                                                                          |
 | `identity-company-onboarding` | Company creation                                                   | `companyId`, `ownerUserId`                                                                                       |
 | `identity-company-settings`   | Company settings changes                                           | `companyId`                                                                                                      |
+| `identity-first-access`       | First-access onboarding: sources chosen and onboarding finished    | `companyId`, `crm`, `calendar`, `whatsapp`, `userId`                                                             |
 | `identity-team`               | Team invites, role changes and member removal                      | `companyId`, `userId`, `role`                                                                                    |
 | `whatsapp-connection`         | Embedded signup: connect, disconnect, invalidation, failed step    | `wabaId`, `phoneNumberId`, `connectionId`, `step`, `reason`                                                      |
 | `whatsapp-webhook`            | Meta webhook verification and delivery                             | `statusCount`, `inboundCount`, `externalMessageId`, `reason`                                                     |
