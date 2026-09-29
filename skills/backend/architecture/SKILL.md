@@ -93,12 +93,14 @@ module**, not an exception to the rule.
 Each feature is composed of one Nest module PER LAYER, chained by imports:
 
 ```
-<Feature>Module (root)  →  imports <Feature>HttpModule only
-<Feature>HttpModule     →  imports <Feature>ApplicationModule (controllers + guards live here)
-<Feature>ApplicationModule → imports <Feature>DomainModule (+ core modules); providers:
-                             applications + module services; exports: applications + cross-module services
-<Feature>DomainModule   →  imports <Feature>RepositoryModule; exports domains
-<Feature>RepositoryModule → imports DatabaseModule/ContextModule; exports repos (feature-internal ONLY)
+<Feature>Module (root)     →  imports the access modules only: Http, Command, Queue (the ones that exist)
+<Feature>HttpModule        →  access/http/     controllers + guards
+<Feature>CommandModule     →  access/commands/ crons (BaseCommand) + the handler that consumes each tick
+<Feature>QueueModule       →  access/queue/    event consumers (QueueHandlerPort) no cron of this module schedules
+<Feature>ApplicationModule →  imports <Feature>DomainModule (+ core modules); providers:
+                              applications + module services; exports: applications + cross-module services
+<Feature>DomainModule      →  imports <Feature>RepositoryModule; exports domains
+<Feature>RepositoryModule  →  imports DatabaseModule/ContextModule; exports repos (feature-internal ONLY)
 ```
 
 - External consumers import the LAYER module they need (`IdentityDomainModule` for domains,
@@ -106,6 +108,32 @@ Each feature is composed of one Nest module PER LAYER, chained by imports:
 - `<Feature>RepositoryModule` is never imported outside its feature: data access from outside
   always goes through the owning domain.
 - Reference implementation: `src/modules/identity/`.
+
+### Access modules: one per entry type, each in its own folder
+
+`access/` is split by how the flow enters, one sub-folder and one Nest module each:
+
+```
+access/
+├── http/      <feature>-http.module.ts     + controllers
+├── commands/  <feature>-command.module.ts  + <name>.command.ts (BaseCommand + its tick handler)
+└── queue/     <feature>-queue.module.ts    + <name>.handler.ts (event consumers)
+```
+
+- Every access module imports `<Feature>ApplicationModule` and registers only its own entry points.
+  Access modules **export nothing** — nobody injects a controller, command or handler; they only
+  have to be registered for Nest (and the `DiscoveryService` in `core/queue`) to find them.
+- The root `<Feature>Module` imports the access modules and has no providers. `app.module.ts`
+  imports the root, never the access modules one by one.
+- **A command and the handler of its tick live in the same file and the same module.** Splitting
+  the pair fails silently both ways: without the command registered, `CommandReconcilerService`
+  removes the cron from Redis on the next boot (`removeOrphans`); without the handler,
+  `BullWorkerService` logs `handlerMissing` and drops the job.
+- A handler that consumes a message some command publishes (fan-out → per-tenant job) is an event
+  consumer and goes in `queue/` — the pair rule covers only the cron tick.
+- No other folder holds entry points: no `fanout/`, `jobs/`, `consumers/` next to the layers.
+- The `access/**` lint rules match the sub-folders as they are; the spec exemption must be
+  `access/**/*.spec.ts`, not `access/*.spec.ts`.
 
 ## Workspace packages
 
@@ -130,7 +158,7 @@ Rules for a package:
 src/
 ├── modules/<feature>/          # one folder per bounded context
 │   ├── <feature>.module.ts
-│   ├── access/                 # controllers, queue processors, ws gateways
+│   ├── access/                 # entry points: http/, commands/, queue/ (one module each)
 │   ├── application/            # orchestration: domains + ports, no data access (module-private)
 │   ├── domain/                 # <entity>.domain.ts injectable aggregates (own their repository)
 │   │                           # + pure types, errors, validations/ (business rules that throw)
