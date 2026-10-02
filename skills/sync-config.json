@@ -6,7 +6,7 @@
             "repos": ["nexu-api"]
         },
         "frontend": {
-            "folders": ["shared"],
+            "folders": ["shared", "frontend"],
             "repos": ["nexu-fe"]
         }
     },
