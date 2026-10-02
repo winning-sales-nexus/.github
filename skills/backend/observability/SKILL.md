@@ -131,6 +131,8 @@ table — same rule as renaming one.
 | `meetings-reconcile`          | Reconciliation sweep fan-out                                        | `stale`, `awaitingOutcome`, `awaitingBot`                                                                        |
 | `calendars-connection`        | Calendar connected, rejected or disconnected, assistant invite turned on or off | `provider`, `connectionId`, `reason`, `enabled`, `userId`                                                  |
 | `calendars-sweep`             | Calendar sweep fan-out, per-user outcome, failure, invalidation, assistant invited as a guest or refused | `connectionId`, `userId`, `provider`, `listed`, `registered`, `cancelled`, `withoutLink`, `alreadyStarted`, `invited`, `meetingId`, `outcome`, `kind` |
+| `calendars-native-recording` | Native recording collection (Meet, Teams): fan-out, lookup pending or refused, auto-recording requested or failed | `provider`, `meetingId`, `status`, `kind`, `outcome`, `meetings` |
+| `calendars-health`           | Calendar connection health: problem reported (connection invalid, native refused, native not recording) and cleared | `provider`, `connectionId`, `problem`, `detail` |
 
 `message` is static by rule, so it is a reliable filter — but it travels as the **log line**, not as
 structured metadata, so the filter is the line filter: ``|= `whatsapp connection failed` `` works
