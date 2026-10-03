@@ -1,6 +1,6 @@
 # .github
 
-Repositório de defaults da org **winning-sales-nexus** (produto **nexu**): templates de issue e PR,
+Repositório de defaults da org **winning-sales-nexus** (produto **nexo**; os repositórios mantêm o prefixo `nexu`): templates de issue e PR,
 o README do perfil, o script do project board e as **skills do Claude Code** distribuídas para os
 outros repos.
 
@@ -9,12 +9,11 @@ outros repos.
 - **Secret `GH_TOKEN`** neste repositório: fine-grained PAT com `Contents: Read and write` em
   `nexu-api` e `nexu-fe` (nada além disso). Sem ele o workflow **Sync Skills** falha logo no
   começo — o `GITHUB_TOKEN` padrão não dá push em outro repositório.
-- **Visibilidade**: o repositório foi criado **privado**. O perfil público da org
-  (`profile/README.md`) e os templates de issue e PR padrão da org só valem com o `.github`
-  **público** — decisão do dono da org. Enquanto estiver privado, a sync de skills funciona
-  normalmente.
-- **Runner**: o workflow roda em `ubuntu-latest` (hospedado pelo GitHub). A org não tem frota de
-  runners self-hosted; em repositório privado no plano free, os minutos são contados na cota da org.
+- **Visibilidade**: o repositório é **público**, então o perfil da org (`profile/README.md`) e os
+  templates de issue e PR padrão valem para todos os repos.
+- **Runner**: o workflow roda em `ubuntu-latest` (hospedado pelo GitHub), gratuito porque o repositório
+  é público. Os runners self-hosted da org (label `nexu`) ficam para `nexu-api`, `nexu-fe` e
+  `nexo-site`.
 - **Project board**: o Project da org já existe (número 1). O `setup-project.sh` aceita o número e
   só adiciona o que falta — ver [Project board](#project-board).
 
@@ -51,6 +50,12 @@ skills/
 │   ├── conventions/SKILL.md         # idioma, vocabulário, tipagem, lint, git
 │   ├── pr-review/SKILL.md           # como revisar um PR
 │   └── qa-run/SKILL.md              # como executar o roteiro de QA de uma milestone
+├── frontend/                        # repos React
+│   ├── data-fetching/SKILL.md
+│   ├── forms/SKILL.md
+│   ├── frontend-architecture/SKILL.md
+│   ├── testing/SKILL.md
+│   └── ui-and-styling/SKILL.md
 └── backend/                         # repos NestJS
     ├── api-conventions/SKILL.md     # DTO/zod, OpenAPI, controller, contrato de erro
     ├── architecture/SKILL.md        # camadas, ports, injeção
@@ -65,14 +70,13 @@ skills/
 
 ### Mapeamento por grupo
 
-| Grupo        | Skills recebidas     | Repos            |
-| ------------ | -------------------- | ---------------- |
-| **backend**  | `shared` + `backend` | nexu-api         |
-| **frontend** | `shared`             | nexu-fe          |
+| Grupo        | Skills recebidas      | Repos            |
+| ------------ | --------------------- | ---------------- |
+| **backend**  | `shared` + `backend`  | nexu-api         |
+| **frontend** | `shared` + `frontend` | nexu-fe          |
 
-O front recebe só as `shared` porque as de backend são específicas de NestJS/Kysely/BullMQ — jogar
-regra de repository layer num repo React é ruído, não padrão. Quando existir skill própria de
-frontend, cria a pasta `skills/frontend/` e adiciona em `folders` do grupo.
+Cada grupo recebe só o que é do seu stack: regra de repository layer num repo React é ruído, não
+padrão. O `nexo-site` (Astro) ainda não recebe skills.
 
 Pra adicionar repos ou grupos, edite `skills/sync-config.json`.
 
@@ -146,7 +150,7 @@ repositório é público. Mudou repo ou posicionamento, atualiza lá.
 
 `setup-project.sh` adiciona ao project board da org os campos de gestão (Priority, Size, Work,
 Area, Epic, Target, Spent) — pulando os que já existem — e vincula `nexu-api`, `nexu-fe`,
-`nexu-observability` e `nexu-observability-infra`. Com um número, usa o project existente; sem
+`nexo-site`, `nexu-observability` e `nexu-observability-infra`. Com um número, usa o project existente; sem
 número, cria um novo. Requer escopo `project` no `gh` e os repositórios já criados:
 
 ```bash
