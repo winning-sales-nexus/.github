@@ -12,8 +12,8 @@ description: >
 
 # Observability — nexu-api
 
-Structured JSON logs with **pino** (`nest-pino`), traces/metrics with **OpenTelemetry**, everything
-shipped to Grafana Cloud via OTLP. Backend is config only — code never knows about Grafana.
+Structured JSON logs with **pino** (`nest-pino`), traces/metrics with **OpenTelemetry**, shipped via OTLP
+to the Grafana backend of each environment (see Connection). Backend is config only — code never knows about Grafana.
 
 ## Correlation: requestId
 
@@ -233,15 +233,23 @@ handle that survives batching and manual replays — and it is what support asks
 
 ## Connection
 
-Grafana stack: not created yet — record its slug and region here when it is (see the
-nexu-observability README). Datasources when writing queries follow the Grafana Cloud defaults:
-`grafanacloud-prom`, `grafanacloud-logs` (Loki), `grafanacloud-traces` (Tempo).
+Production telemetry goes to the shared self-hosted Grafana at https://telemetry.revtriever.com
+(Revtriever prod account, behind Cloudflare Access). It serves revtriever, nexu and getcart; nexu
+has its own folder `nexu`. Datasources for nexu queries: `revtriever-prometheus`, `revtriever-loki`,
+`revtriever-tempo` and `nexu-postgres`. Projects are separated by the `service_namespace` label
+(`nexu` for this product), `service_name` and `deployment_environment_name`.
+
+Dev telemetry goes to the Grafana Cloud stack https://regalsyrup1014.grafana.net, with the Grafana
+Cloud defaults: `grafanacloud-prom`, `grafanacloud-logs` (Loki), `grafanacloud-traces` (Tempo).
+
+Alerting notifications for the shared stack are owned by `Revtriever/revtriever-observability-infra`
+(Google Chat, critical only). Product repos own only their own folder; do not add contact points here.
 
 Local/dev env values live in `~/.config/nexu/grafana-otlp.env` (push token in a sibling file;
 the service account token for the Grafana API is `grafana-sa-token`, next to it). In AWS they are
-secrets injected into the task. Exporter is OTLP http/protobuf; switching backends is an env change,
-never a code change. Self-hosting the LGTM stack is a deliberate future decision, triggered only
-when Grafana Cloud free tier limits actually hurt.
+secrets injected into the task. Exporter is OTLP http/protobuf; the OTLP endpoint for prod is the
+private one published in SSM `/revtriever/observability/otlp-endpoint`. Switching backends is an env
+change, never a code change.
 
 **Logs travel the same pipe as traces.** A pino transport turns each line into an OTLP LogRecord and
 ships it through the gateway already configured — one exporter, one auth, and `service.name` matches
