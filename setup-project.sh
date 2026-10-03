@@ -37,7 +37,7 @@ field "Target"    DATE
 field "Spent (h)" NUMBER
 
 echo "== vinculando repositórios"
-for repo in nexu-api nexu-fe nexu-observability nexu-observability-infra; do
+for repo in nexu-api nexu-fe nexo-site nexu-observability nexu-observability-infra; do
   gh project link "$NUMBER" --owner "$OWNER" --repo "$repo" > /dev/null && echo "   $repo"
 done
 
