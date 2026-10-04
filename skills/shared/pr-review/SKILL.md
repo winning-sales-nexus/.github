@@ -29,8 +29,13 @@ read.
 
 ## The rule that governs everything
 
-**Silence when there is nothing.** Don't write "LGTM", don't summarize the PR, don't compliment. If
-you found nothing concrete, finish without commenting. That is what makes a comment mean something.
+**One comment, every run — and only what is real in it.** Every review ends with exactly one
+comment on the PR, even when you found nothing. A run that ends without a comment cannot be told
+apart from a review that crashed, and the team decides the merge on that comment.
+
+What stays forbidden is noise: no "LGTM", no summary of the PR, no compliments, no generic advice.
+When you found nothing concrete, the comment says so in one line (see **Nenhum achado** under
+Comment format) and nothing else.
 
 An invented finding costs more than a missed one: it teaches the team to ignore the next review.
 
@@ -38,6 +43,12 @@ An invented finding costs more than a missed one: it teaches the team to ignore 
 
 The argument is the **PR number**. Use it in every `gh` command — in a CI checkout `gh` cannot
 detect the PR on its own, and a command without the number either fails or reviews the wrong thing.
+
+You run in CI, unattended, with a read-only toolset. Stay inside it: read the diff with
+`gh pr diff <number>` (`--name-only` for the file list, `| head` / `| sed -n` to page), open whole
+files with Read, search with Grep. Do not redirect output to files, do not `cd` out of the
+repository, do not script with `python` or `jq` — the runner denies those, and each denial costs a
+turn.
 
 ### 1. Load what was decided — before the diff
 
@@ -90,9 +101,24 @@ everywhere; a backend repo also carries `api-conventions`, `architecture`, `data
 Open the file, confirm the problem exists in the code as it stands now, and build the concrete
 scenario in which it fails. If you cannot describe input and consequence, it is not a finding.
 
-### 6. Comment once, with every finding
+### 6. Post the comment — exactly once, always
 
-`gh pr comment <number> --body "..."`
+Pass the body on stdin through a quoted heredoc. This is the only form that keeps backticks, quotes
+and `$` intact:
+
+```
+gh pr comment <number> --body-file - <<'EOF'
+…the whole comment, exactly as it should render…
+EOF
+```
+
+- Never `--body "..."`. Every file path in the format sits in backticks, and a backtick inside
+  double quotes is command substitution: the runner denies the command and the review is lost.
+- Inside the heredoc, escape nothing. `` \` `` and `\"` reach the PR as literal backslashes.
+- Nobody is there to approve anything. If the command is denied or fails, read the error, fix the
+  command and run it again. A denial is not someone telling you to stop. Do not end the session
+  until the comment is posted.
+- Post once. Collect everything before this step instead of adding a second comment later.
 
 ## Invariants
 
@@ -175,8 +201,8 @@ that counts:
 
 > **Rodada de QA:** nenhuma registrada nesta milestone.
 
-Say it even when everything passed, and say it even when you found nothing else — this line is the
-one exception to the silence rule, because its absence is indistinguishable from a clean round.
+Say it even when everything passed and even when you found nothing else, because its absence is
+indistinguishable from a clean round.
 Never assert a round happened without a comment to point at, and never soften "nenhuma registrada"
 into something that sounds fine.
 
@@ -189,6 +215,16 @@ input and consequence, not theory. If the fix is obvious, one line saying what i
 
 Order by severity: money and personal data first, then a decision the code contradicts or a
 card it dropped, then integrity, then the rest.
+
+**Nenhum achado.** When you found nothing, the comment (after the QA line, on a milestone PR) is a
+single line that names what you reviewed against, so the reader knows the review ran and on what
+basis:
+
+> **Nenhum achado.** Revisei contra o corpo do PR e a issue #412.
+
+> **Nenhum achado.** Revisei contra o PRD e os 9 cards da milestone `agenda-microsoft`.
+
+No "LGTM", no summary of the change, no list of what you checked.
 
 **Write the comment itself in pt-BR**, in full sentences — the skill is English because it is how we
 build, but a PR comment is read by the team and belongs in the pt-BR column of the conventions
