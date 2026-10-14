@@ -55,7 +55,9 @@ skills/
 │   ├── forms/SKILL.md
 │   ├── frontend-architecture/SKILL.md
 │   ├── testing/SKILL.md
-│   └── ui-and-styling/SKILL.md
+│   └── ui-and-styling/
+│       ├── SKILL.md
+│       └── references/ai-slop.md  # padrões que fazem a tela parecer gerada
 └── backend/                         # repos NestJS
     ├── api-conventions/SKILL.md     # DTO/zod, OpenAPI, controller, contrato de erro
     ├── architecture/SKILL.md        # camadas, ports, injeção

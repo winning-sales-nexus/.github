@@ -7,7 +7,7 @@ description: >
   formatting a value, or when eslint says "Cor literal fora dos tokens do design system". Triggers
   on: "componente", "component", "estilo", "style", "tailwind", "cor", "color", "token", "tema",
   "dark mode", "tabela", "table", "moeda", "formatar", "skeleton", "empty state", "toast", "modal",
-  "catalog", "design system".
+  "catalog", "design system", "AI slop", "parece gerado", "genérico".
 ---
 
 # UI & Styling — nexu-fe
@@ -113,6 +113,14 @@ Code identifiers stay English (conventions skill).
   what happened; critical toasts do not auto-dismiss (`durationMs: 0`); the stack shows at most 3.
   Errors: `failureToast(title, error)` (keeps the API `detail`).
 - Anything above ~400 ms shows progress (`Button loading`, skeletons).
+
+## Not looking generated
+
+nexu is a product used every day, so restraint is the default: no side accent stripes on cards,
+no glass or glow outside the dark hero blocks, no gradient text, no cards inside cards, no icon
+tile above every heading, no bounce easing, no buzzwords or em-dash cadence in copy. Before calling
+a screen done, check it against [references/ai-slop.md](references/ai-slop.md); it lists each
+pattern, the sanctioned exceptions in this repo and a grep scan for review.
 
 ## Seeing it
 
